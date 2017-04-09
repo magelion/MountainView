@@ -50,6 +50,7 @@ class Viewer : public QGLWidget {
 
   void createFBO();
   void deleteFBO();
+  void noiseFBO();
 
   // drawing functions 
   void drawSceneFromCamera(GLuint id);
@@ -72,10 +73,12 @@ class Viewer : public QGLWidget {
 
   Shader *_shadowMapShader;
   Shader *_renderingShader;
+  Shader *_defaultShader;
   Shader *_debugShader;
 
   // vbo/vao ids 
   GLuint _vaoObject;
+  GLuint _vaoTerrain;
   GLuint _vaoFloor;
   GLuint _vaoQuad;
 
@@ -84,15 +87,17 @@ class Viewer : public QGLWidget {
   GLuint _quad;
 
   // texture ids 
+  GLuint _texTerrain;
   GLuint _texColor[2];
   GLuint _texNormal[2];
   
   // fbo id and associated depth texture 
   GLuint _fbo;
+  GLuint _fboTerrain;
   GLuint _texDepth; // this will be our shadowmap! 
   unsigned int _depthResol; // this is the resolution of the shadowmap (squared texture)
-
-  GLuint _vaoTerrain;
+  unsigned int _terrainResol;
+  
   GLuint _terrain[2];
 
   Grid *_grid;
