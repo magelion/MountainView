@@ -22,7 +22,7 @@ Viewer::Viewer(char *filename,const QGLFormat &format)
 
   //_mesh = new Mesh(filename);
   //_cam  = new Camera(_mesh->radius,glm::vec3(_mesh->center[0],_mesh->center[1],_mesh->center[2]));
-  _cam  = new Camera(0,glm::vec3(0,0,0));
+  _cam  = new Camera(1,glm::vec3(0,0,0));
 
   _timer->setInterval(10);
   connect(_timer,SIGNAL(timeout()),this,SLOT(updateGL()));
@@ -137,15 +137,45 @@ void Viewer::createShaders() {
   _renderingShader = new Shader();
   _renderingShader->load("shaders/noise.vert","shaders/noise.frag");
 
-  //Render terrain
+  //Render texture
   _defaultShader = new Shader();
   _defaultShader->load("shaders/default.vert","shaders/default.frag");
+  
+  _grilleShader = new Shader();
+  _grilleShader->load("shaders/grille.vert","shaders/grille.frag");
+  
+  //Render montagnes
+  _normalShader = new Shader();
+  _normalShader->load("shaders/normal.vert","shaders/normal.frag");
 }
 
 
 void Viewer::deleteShaders() {
   delete _renderingShader; _renderingShader = NULL;
   delete _defaultShader; _defaultShader = NULL;
+  delete _normalShader; _normalShader = NULL;
+  delete _grilleShader; _grilleShader = NULL;
+}
+
+void Viewer::drawSceneFromCamera(GLuint id) {
+	/*const float size = _terrainResol;
+	glm::vec3 l   = glm::transpose(_cam->normalMatrix())*_light;
+	glm::mat4 p   = glm::ortho<float>(-size,size,-size,size,-size,2*size);
+	glm::mat4 v   = glm::lookAt(l, glm::vec3(0,0,0), glm::vec3(0,1,0));
+	glm::mat4 m   = glm::mat4(1.0);
+	glm::mat4 mv  = v*m;*/
+	
+	glUniformMatrix4fv(glGetUniformLocation(id,"projMat"),1,GL_FALSE,&(_cam->projMatrix()[0][0]));
+	glUniformMatrix3fv(glGetUniformLocation(id,"normalMat"),1,GL_FALSE,&(_cam->normalMatrix()[0][0]));
+	
+	const glm::vec3 pos = glm::vec3(0,0,0);
+    const glm::mat4 mdv = glm::translate(_cam->mdvMatrix(),pos);
+    glUniformMatrix4fv(glGetUniformLocation(id,"mdvMat"),1,GL_FALSE,&(_cam->mdvMatrix()[0][0]));
+	
+	
+	glBindVertexArray(_vaoTerrain);
+	glDrawElements(GL_TRIANGLES,3*_grid->nbFaces(),GL_UNSIGNED_INT,(void *)0);
+	glBindVertexArray(0);
 }
 
 void Viewer::paintGL() {
@@ -177,17 +207,23 @@ void Viewer::paintGL() {
   //restore & clear
   glViewport(0,0,width(),height());
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+  
+  glUseProgram(_grilleShader->id());
+  drawSceneFromCamera(_grilleShader->id());
+  
   //Affiche la texture generee
-  glUseProgram(_defaultShader->id());
+  /*glUseProgram(_normalShader->id());
 
     // envoie la texture du terrain au shader  
+  glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D,_texTerrain);
-  glUniform1i(glGetUniformLocation(_defaultShader->id(),"heightmap"),0);
-
+  glUniform1i(glGetUniformLocation(_normalShader->id(),"heightmap"),0);
+  
+  drawSceneFromCamera(_normalShader->id());*/
+  
   //dessine sur le quad
-  glBindVertexArray(_vaoQuad);
-  glDrawArrays(GL_TRIANGLES,0,6);
+  /*glBindVertexArray(_vaoQuad);
+  glDrawArrays(GL_TRIANGLES,0,6);*/
 
   //unbind
   glBindVertexArray(0);
