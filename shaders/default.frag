@@ -1,6 +1,6 @@
 #version 330
 
-uniform sampler2D texTerrain;
+uniform sampler2D heightmap;
 
 in vec2 coord;
 
@@ -8,5 +8,5 @@ out vec4 outbuffer;
 
 void main() {
 
-  outbuffer = texture(texTerrain,coord);
+  outbuffer = texture(heightmap,coord);
 }

@@ -20,8 +20,9 @@ Viewer::Viewer(char *filename,const QGLFormat &format)
 
   setlocale(LC_ALL,"C");
 
-  _mesh = new Mesh(filename);
-  _cam  = new Camera(_mesh->radius,glm::vec3(_mesh->center[0],_mesh->center[1],_mesh->center[2]));
+  //_mesh = new Mesh(filename);
+  //_cam  = new Camera(_mesh->radius,glm::vec3(_mesh->center[0],_mesh->center[1],_mesh->center[2]));
+  _cam  = new Camera(0,glm::vec3(0,0,0));
 
   _timer->setInterval(10);
   connect(_timer,SIGNAL(timeout()),this,SLOT(updateGL()));
@@ -31,7 +32,7 @@ Viewer::Viewer(char *filename,const QGLFormat &format)
 
 Viewer::~Viewer() {
   delete _timer;
-  delete _mesh;
+  //delete _mesh;
   delete _cam;
   delete _grid;
 
@@ -182,7 +183,7 @@ void Viewer::paintGL() {
 
     // envoie la texture du terrain au shader  
   glBindTexture(GL_TEXTURE_2D,_texTerrain);
-  glUniform1i(glGetUniformLocation(_defaultShader->id(),"texTerrain"),0);
+  glUniform1i(glGetUniformLocation(_defaultShader->id(),"heightmap"),0);
 
   //dessine sur le quad
   glBindVertexArray(_vaoQuad);

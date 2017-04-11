@@ -24,7 +24,7 @@ int main(int argc,char** argv) {
   fmt.setProfile(QGLFormat::CoreProfile);
   fmt.setSampleBuffers(true);
 
-  Viewer viewer(getFilename(argc,argv),fmt);
+  Viewer viewer(""/*getFilename(argc,argv)*/,fmt);
 
   viewer.setWindowTitle("Exercice 08 - Shadows");
   viewer.show();
