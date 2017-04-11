@@ -8,15 +8,15 @@
 using namespace std;
 
 
-Viewer::Viewer(char *filename,const QGLFormat &format)
+Viewer::Viewer(const QGLFormat &format)
   : QGLWidget(format),
     _timer(new QTimer(this)),
     _currentshader(0),
     _light(glm::vec3(0,0,1)),
     _mode(false),
     _showShadowMap(false),
-    _terrainResol(512),
-    _depthResol(512) {
+    _depthResol(512),
+    _terrainResol(512) {
 
   setlocale(LC_ALL,"C");
 
@@ -83,9 +83,9 @@ void Viewer::noiseFBO() {
 }
 
 
-void Viewer::loadTexture(GLuint id,const char *filename) {
+/*void Viewer::loadTexture(GLuint id,const char *filename) {
 
-}
+}*/
 
 void Viewer::createTextures() {
 
@@ -172,8 +172,8 @@ void Viewer::drawSceneFromCamera(GLuint id) {
 	glUniformMatrix4fv(glGetUniformLocation(id,"projMat"),1,GL_FALSE,&(_cam->projMatrix()[0][0]));
 	glUniformMatrix3fv(glGetUniformLocation(id,"normalMat"),1,GL_FALSE,&(_cam->normalMatrix()[0][0]));
 	
-	const glm::vec3 pos = glm::vec3(0,0,0);
-    const glm::mat4 mdv = glm::translate(_cam->mdvMatrix(),pos);
+	//const glm::vec3 pos = glm::vec3(0,0,0);
+    //const glm::mat4 mdv = glm::translate(_cam->mdvMatrix(),pos);
     glUniformMatrix4fv(glGetUniformLocation(id,"mdvMat"),1,GL_FALSE,&(_cam->mdvMatrix()[0][0]));
 	
 	
