@@ -4,9 +4,9 @@ uniform sampler2D texTerrain;
 
 in vec2 coord;
 
-out vec4 outBuffer;
+out vec4 outbuffer;
 
 void main() {
 
-  outBuffer = texture(texTerrain,coord);
+  outbuffer = texture(texTerrain,coord);
 }
