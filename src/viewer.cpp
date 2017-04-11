@@ -147,6 +147,9 @@ void Viewer::createShaders() {
   //Render montagnes
   _normalShader = new Shader();
   _normalShader->load("shaders/normal.vert","shaders/normal.frag");
+  
+  _dispShader = new Shader();
+  _dispShader->load("shaders/displacement.vert","shaders/displacement.frag");
 }
 
 
@@ -155,6 +158,7 @@ void Viewer::deleteShaders() {
   delete _defaultShader; _defaultShader = NULL;
   delete _normalShader; _normalShader = NULL;
   delete _grilleShader; _grilleShader = NULL;
+  delete _dispShader; _dispShader = NULL;
 }
 
 void Viewer::drawSceneFromCamera(GLuint id) {
@@ -209,22 +213,24 @@ void Viewer::paintGL() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
   glUseProgram(_grilleShader->id());
-  drawSceneFromCamera(_grilleShader->id());
+  drawSceneFromCamera(_grilleShader->id()); 
   
+  //glViewport(0,0,width(),height());
+  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   //Affiche la texture generee
-  /*glUseProgram(_normalShader->id());
+  glUseProgram(_normalShader->id());
 
     // envoie la texture du terrain au shader  
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D,_texTerrain);
   glUniform1i(glGetUniformLocation(_normalShader->id(),"heightmap"),0);
   
-  drawSceneFromCamera(_normalShader->id());*/
+  //drawSceneFromCamera(_normalShader->id());
   
   //dessine sur le quad
-  /*glBindVertexArray(_vaoQuad);
-  glDrawArrays(GL_TRIANGLES,0,6);*/
-
+  //glBindVertexArray(_vaoQuad);
+  //glDrawArrays(GL_TRIANGLES,0,6);
+   
   //unbind
   glBindVertexArray(0);
 

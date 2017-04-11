@@ -77,6 +77,7 @@ class Viewer : public QGLWidget {
   Shader *_debugShader;
   Shader *_normalShader;
   Shader *_grilleShader;
+  Shader *_dispShader;
 
   // vbo/vao ids 
   GLuint _vaoObject;
