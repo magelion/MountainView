@@ -2,11 +2,26 @@
 
 layout(location = 0) in vec3 position;
 
-uniform Sampler2D hnmap;
-out vec4 normal;
+uniform sampler2D hmap;
+uniform mat4 mdvMat;
+uniform mat4 projMat;
+uniform mat3 normalMat;
+uniform vec3 light;
+
+
+//out vec4 normal;
+out vec2 coord;
+out vec3 pos;
+out vec4 fragmentColor;
 
 void main() {
-  vec4 n = texture(hnmap, position.xy*0.5+0.5);
-  gl_Position = projMat*mdvMat*vec4(position + d.x*vec3(0,0,1),1.0);
-  normal = n;
+    pos = position;
+    coord = position.xy*0.5+0.5;
+
+    //deplacement sur z
+    pos.z = texture(hmap,coord).x;
+    gl_Position = projMat*mdvMat*vec4(pos,1.0);
+    //gl_Position = projMat*mdvMat*vec4(position,1.0);
+    fragmentColor = vec4(dot(vec3(0,0,1),light));
+
 }

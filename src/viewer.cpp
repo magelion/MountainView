@@ -168,15 +168,22 @@ void Viewer::drawSceneFromCamera(GLuint id) {
 	glm::mat4 v   = glm::lookAt(l, glm::vec3(0,0,0), glm::vec3(0,1,0));
 	glm::mat4 m   = glm::mat4(1.0);
 	glm::mat4 mv  = v*m;*/
-	
+    
 	glUniformMatrix4fv(glGetUniformLocation(id,"projMat"),1,GL_FALSE,&(_cam->projMatrix()[0][0]));
 	glUniformMatrix3fv(glGetUniformLocation(id,"normalMat"),1,GL_FALSE,&(_cam->normalMatrix()[0][0]));
 	
 	//const glm::vec3 pos = glm::vec3(0,0,0);
     //const glm::mat4 mdv = glm::translate(_cam->mdvMatrix(),pos);
     glUniformMatrix4fv(glGetUniformLocation(id,"mdvMat"),1,GL_FALSE,&(_cam->mdvMatrix()[0][0]));
-	
-	
+
+    //lumière
+    glUniform3f(glGetUniformLocation(id,"light"), _light[0], _light[1], _light[2]);
+    
+    // envoie la texture du terrain au shader  
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D,_texTerrain);
+    glUniform1i(glGetUniformLocation(_normalShader->id(),"hmap"),0);
+    
 	glBindVertexArray(_vaoTerrain);
 	glDrawElements(GL_TRIANGLES,3*_grid->nbFaces(),GL_UNSIGNED_INT,(void *)0);
 	glBindVertexArray(0);
@@ -212,20 +219,15 @@ void Viewer::paintGL() {
   glViewport(0,0,width(),height());
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
-  glUseProgram(_grilleShader->id());
-  drawSceneFromCamera(_grilleShader->id()); 
+  //glUseProgram(_grilleShader->id());
+  //drawSceneFromCamera(_grilleShader->id()); 
   
   //glViewport(0,0,width(),height());
   //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  //Affiche la texture generee
-  glUseProgram(_normalShader->id());
 
-    // envoie la texture du terrain au shader  
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D,_texTerrain);
-  glUniform1i(glGetUniformLocation(_normalShader->id(),"heightmap"),0);
-  
-  //drawSceneFromCamera(_normalShader->id());
+  // Déforme la grille
+  glUseProgram(_dispShader->id());
+  drawSceneFromCamera(_dispShader->id());
   
   //dessine sur le quad
   //glBindVertexArray(_vaoQuad);

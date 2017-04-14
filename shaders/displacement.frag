@@ -1,8 +1,12 @@
 #version 330
 
-in  vec4 fragmentColor;
+uniform sampler2D hmap;
 out vec4 bufferColor;
 
+in vec2 coord;
+in vec3 pos;
+in vec4 fragmentColor;
+
 void main() {
-  bufferColor = vec4(1,0,0,0);
+  bufferColor = fragmentColor;
 }
