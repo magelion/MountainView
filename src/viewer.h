@@ -1,6 +1,8 @@
 #ifndef VIEWER_H
 #define VIEWER_H
 
+#define SIZE_TERRAIN 512
+
 // GLEW lib: needs to be included first!!
 #include <GL/glew.h> 
 

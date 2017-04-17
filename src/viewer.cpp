@@ -12,11 +12,11 @@ Viewer::Viewer(const QGLFormat &format)
   : QGLWidget(format),
     _timer(new QTimer(this)),
     _currentshader(0),
-    _light(glm::vec3(0,0,1)),
+    _light(glm::vec3(1,0,0.25)),
     _mode(false),
     _showShadowMap(false),
     _depthResol(512),
-    _terrainResol(512) {
+    _terrainResol(SIZE_TERRAIN) {
 
   setlocale(LC_ALL,"C");
 
