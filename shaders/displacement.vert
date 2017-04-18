@@ -3,14 +3,20 @@
 layout(location = 0) in vec3 position;
 
 uniform sampler2D hmap;
-uniform mat4 mdvMat, projMat, normalMat;
+uniform mat4 mdvMat;
+uniform mat4 projMat;
+uniform mat3 normalMat;
 uniform vec3 light;
 
+out vec3 normalView;
+out vec3 camView;
+out vec3 tangent;
+
 out vec3 normal;
-out vec3 camDir;
-out vec3 lightPos;
-out vec2 coord;
+out vec3 lightDir;
 out vec3 pos;
+out vec2 coord;
+
 out vec4 fragmentColor;
 
 /* finite difference method */
@@ -33,27 +39,22 @@ vec3 normalGrid(){
 
 
 void main() {
+
     pos = position;
     coord = position.xy*0.5+0.5;
 
     //deplacement sur z
     pos.z = texture(hmap,coord).x;
     gl_Position = projMat*mdvMat*vec4(pos,1.0);
-    //gl_Position = projMat*mdvMat*vec4(position,1.0);
 
     vec3 N = normalGrid();
 
-    camDir = normalize((mdvMat*vec4(pos,1.0)).xyz);
-    vec3 viewDir = normalize(camDir - pos);
+    normal = normalMat * N;
+    vec4 pos4 = mdvMat * vec4(pos,1.0);
+    vec3 pos3 = pos4.xyz / pos4.w;        
+    lightDir = normalize(light - pos3);
+    camView = normalize(-pos3);
 
-    //phong
-    float diff = max(dot(N, light), 0.0);
-    vec3 diffuse = diff * vec3(0,0,1);
-    vec3 reflectDir = reflect(-light, N); 
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-    vec3 specular = 0.75 * spec * vec3(1,0,0);  
-    
-    vec3 res = (vec3(0.2,0.2,0.2) + diffuse + specular) * vec3(0.9,0.9,0.9);
-    //fragmentColor = vec4(dot(N,light));
-    fragmentColor = vec4(res,1.0f);
+    fragmentColor = vec4(dot(N,light));
+
 }
