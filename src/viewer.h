@@ -93,6 +93,7 @@ class Viewer : public QGLWidget {
 
   // texture ids 
   GLuint _texTerrain;
+  GLuint _texNormTerrain;
   GLuint _texColor[2];
   GLuint _texNormal[2];
   

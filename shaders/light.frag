@@ -1,6 +1,7 @@
 #version 330
 
 uniform sampler2D hmap;
+uniform sampler2D normmap;
 uniform vec3 light;
 out vec4 bufferColor;
 

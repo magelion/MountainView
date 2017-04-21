@@ -1,7 +1,7 @@
 #version 330
 
 out vec4 outbuffer;
-uniform sampler2D heightmap;
+uniform sampler2D hmap;
 in vec2 texcoord;
 
 float value(in vec4 c) {
@@ -10,15 +10,15 @@ float value(in vec4 c) {
 }
 
 void main() {
-	vec2 ps = 1./vec2(textureSize(heightmap,0));
-	vec2 g = vec2( value(texture(heightmap,texcoord+vec2(ps.x,0.))) -
-	value(texture(heightmap,texcoord-vec2(ps.x,0.))),
-	value(texture(heightmap,texcoord+vec2(0.,ps.y))) -
-	value(texture(heightmap,texcoord-vec2(0.,ps.y))))/2.;
+	vec2 ps = 1./vec2(textureSize(hmap,0));
+	vec2 g = vec2( value(texture(hmap,texcoord+vec2(ps.x,0.))) -
+	value(texture(hmap,texcoord-vec2(ps.x,0.))),
+	value(texture(hmap,texcoord+vec2(0.,ps.y))) -
+	value(texture(hmap,texcoord-vec2(0.,ps.y))))/2.;
 	float scale = 100.;
 	vec3 n1 = vec3(1.,0.,g.x*scale);
 	vec3 n2 = vec3(0.,1.,-g.y*scale);
 	vec3 n = normalize(cross(n1,n2));
 
-	outbuffer = vec4(n,value(texture(heightmap,texcoord)));
+	outbuffer = vec4(n,value(texture(hmap,texcoord)));
 }

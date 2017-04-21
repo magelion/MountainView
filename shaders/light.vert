@@ -3,6 +3,7 @@
 layout(location = 0) in vec3 position;
 
 uniform sampler2D hmap;
+uniform sampler2D normmap;
 uniform mat4 mdvMat;
 uniform mat4 projMat;
 uniform mat3 normalMat;
@@ -21,7 +22,7 @@ out vec4 fragmentColor;
 
 /* finite difference method */
 
-vec3 normalGrid(){
+/*vec3 normalGrid(){
     
     // Central Difference Scheme (stackoverflow.com/questions/13983189/opengl-how-to-calculate-normals-in-a-terrain-height-grid)
 
@@ -35,7 +36,7 @@ vec3 normalGrid(){
     vec3 hNorm = normalize(cross(tangX, tangY));
     
     return hNorm;
-}
+}*/
 
 
 void main() {
@@ -47,9 +48,9 @@ void main() {
     pos.z = texture(hmap,coord).x;
     gl_Position = projMat*mdvMat*vec4(pos,1.0);
 
-    vec3 N = normalGrid();
+    vec3 N = vec3(0,0,1);
 
-    normal = normalMat * N;
+    normal = texture(normmap,coord).xyz * N;
     vec4 pos4 = mdvMat * vec4(pos,1.0);
     vec3 pos3 = pos4.xyz / pos4.w;        
     lightDir = normalize(light - pos3);

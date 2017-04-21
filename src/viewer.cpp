@@ -46,6 +46,7 @@ Viewer::~Viewer() {
 void Viewer::deleteTextures() {
   // delete loaded textures 
   glDeleteTextures(1,&_texTerrain);
+  glDeleteTextures(1,&_texNormTerrain);
   glDeleteTextures(2,_texColor);
   glDeleteTextures(2,_texNormal);
 }
@@ -61,6 +62,7 @@ void Viewer::createFBO() {
 
     glGenFramebuffers(1, &_fboTerrain);
     glGenTextures(1, &_texTerrain);
+    glGenTextures(1, &_texNormTerrain);
     glGenTextures(1, &_texNormal[0]);
 
 }
@@ -72,11 +74,19 @@ void Viewer::noiseFBO() {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _terrainResol, _terrainResol, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D,_texNormTerrain);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _terrainResol, _terrainResol, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
     //bind to FBO
     glBindFramebuffer(GL_FRAMEBUFFER,_fboTerrain);
     glBindTexture(GL_TEXTURE_2D,_texTerrain);
     glFramebufferTexture2D(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,_texTerrain,0);
+
+    glBindTexture(GL_TEXTURE_2D,_texNormTerrain);
+    glFramebufferTexture2D(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT1,GL_TEXTURE_2D,_texTerrain,0);
 
     //unbind
     glBindFramebuffer(GL_FRAMEBUFFER,0);
@@ -191,6 +201,9 @@ void Viewer::drawSceneFromCamera(GLuint id) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D,_texTerrain);
     glUniform1i(glGetUniformLocation(id,"hmap"),0);
+    glActiveTexture(GL_TEXTURE0+1);
+    glBindTexture(GL_TEXTURE_2D,_texNormTerrain);
+    glUniform1i(glGetUniformLocation(id,"normmap"),0);
     
 	glBindVertexArray(_vaoTerrain);
 	glDrawElements(GL_TRIANGLES,3*_grid->nbFaces(),GL_UNSIGNED_INT,(void *)0);
@@ -204,7 +217,7 @@ void Viewer::paintGL() {
   // Attache le buffer pour le terrain
   glBindFramebuffer(GL_FRAMEBUFFER, _fboTerrain);
   //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _texTerrain, 0);
-  //glDrawBuffer(GL_COLOR_ATTACHMENT0);
+  glDrawBuffer(GL_COLOR_ATTACHMENT0);
   glViewport(0,0,_terrainResol,_terrainResol);
 
   // Clear les buffers avant dessin
@@ -225,12 +238,32 @@ void Viewer::paintGL() {
 
   /* ********************* passe 2 ********************* */
 
+  
+  
+  /* ********************* passe 3 ********************* */
+
+  // Déforme la grille
+
+  glViewport(0,0,width(),height());
+  
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  
+  glUseProgram(_dispShader->id());
+  drawSceneFromCamera(_dispShader->id());
+
+  glBindFramebuffer(GL_FRAMEBUFFER, _fboTerrain);
   //restore & clear
   glViewport(0,0,width(),height());
+  glDrawBuffer(GL_COLOR_ATTACHMENT1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // Active le normal shader
   glUseProgram(_normalShader->id());  
+
+  // envoie la texture du terrain au shader  
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D,_texTerrain);
+  glUniform1i(glGetUniformLocation(_normalShader->id(),"hmap"),0);
 
   // dessine sur vaoQuad
   glBindVertexArray(_vaoQuad);
@@ -240,19 +273,10 @@ void Viewer::paintGL() {
   glBindVertexArray(0);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   
-  /* ********************* passe 3 ********************* */
-
-  // Déforme la grille
-  
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  
-  glUseProgram(_dispShader->id());
-  drawSceneFromCamera(_dispShader->id());
-  
   //Lumieres 
   
-  //glUseProgram(_lightShader->id());
-  //drawSceneFromCamera(_lightShader->id());
+  glUseProgram(_lightShader->id());
+  drawSceneFromCamera(_lightShader->id());
   
   // disable shader 
   glUseProgram(0);
