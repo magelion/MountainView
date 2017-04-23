@@ -46,6 +46,7 @@ Viewer::~Viewer() {
 void Viewer::deleteTextures() {
   // delete loaded textures 
   glDeleteTextures(1,&_texTerrain);
+  glDeleteTextures(1,&_texNormTerrain);
   glDeleteTextures(2,_texColor);
   glDeleteTextures(2,_texNormal);
 }
@@ -54,14 +55,16 @@ void Viewer::deleteTextures() {
 void Viewer::deleteFBO() {
 
     glDeleteFramebuffers(1, &_fboTerrain);
+    glDeleteFramebuffers(1, &_fboNormal);
 
 }
 
 void Viewer::createFBO() {
 
     glGenFramebuffers(1, &_fboTerrain);
+    glGenFramebuffers(1, &_fboNormal);
     glGenTextures(1, &_texTerrain);
-    glGenTextures(1, &_texNormal[0]);
+    glGenTextures(1, &_texNormTerrain);
 
 }
 
@@ -82,16 +85,29 @@ void Viewer::noiseFBO() {
     glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 
+void Viewer::normalFBO() {
+
+    //create texture
+    glBindTexture(GL_TEXTURE_2D,_texNormTerrain);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _terrainResol, _terrainResol, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    //bind to FBO
+    glBindFramebuffer(GL_FRAMEBUFFER,_fboNormal);
+    glBindTexture(GL_TEXTURE_2D,_texNormTerrain);
+    glFramebufferTexture2D(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,_texNormTerrain,0);
+
+    //unbind
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
+}
+
 /*void Viewer::loadTexture(GLuint id,const char *filename) {
 
 }*/
 
 void Viewer::createTextures() {
     
-    glBindTexture(GL_TEXTURE_2D,_texNormal[0]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _terrainResol, _terrainResol, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 }
 
@@ -169,7 +185,7 @@ void Viewer::deleteShaders() {
   delete _lightShader; _lightShader = NULL;
 }
 
-void Viewer::drawSceneFromCamera(GLuint id) {
+    void Viewer::drawSceneFromCamera(GLuint id) {
 	/*const float size = _terrainResol;
 	glm::vec3 l   = glm::transpose(_cam->normalMatrix())*_light;
 	glm::mat4 p   = glm::ortho<float>(-size,size,-size,size,-size,2*size);
@@ -191,6 +207,9 @@ void Viewer::drawSceneFromCamera(GLuint id) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D,_texTerrain);
     glUniform1i(glGetUniformLocation(id,"hmap"),0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D,_texNormTerrain);
+    glUniform1i(glGetUniformLocation(id,"nmap"),0);
     
 	glBindVertexArray(_vaoTerrain);
 	glDrawElements(GL_TRIANGLES,3*_grid->nbFaces(),GL_UNSIGNED_INT,(void *)0);
@@ -225,12 +244,17 @@ void Viewer::paintGL() {
 
   /* ********************* passe 2 ********************* */
 
-  //restore & clear
-  glViewport(0,0,width(),height());
+  // Attache le buffer pour le terrain
+  glBindFramebuffer(GL_FRAMEBUFFER, _fboNormal);
+  glViewport(0,0,_terrainResol,_terrainResol);
+
+  // Clear les buffers avant dessin
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // Active le normal shader
-  glUseProgram(_normalShader->id());  
+  // Active le normal shader et envoie le bruit généré dans la passe 1
+  glUseProgram(_normalShader->id());
+  glBindTexture(GL_TEXTURE_2D,_texTerrain);
+  glUniform1i(glGetUniformLocation(_defaultShader->id(),"heightmap"),0);
 
   // dessine sur vaoQuad
   glBindVertexArray(_vaoQuad);
@@ -242,17 +266,29 @@ void Viewer::paintGL() {
   
   /* ********************* passe 3 ********************* */
 
-  // Déforme la grille
+  // Back to default viewport
+  glViewport(0,0,width(),height());
   
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  /* 
+  // TEST : Decommenter pour afficher la texture voulue
+  glUseProgram(_defaultShader->id());
+  glBindTexture(GL_TEXTURE_2D,_texNormTerrain);
+  glUniform1i(glGetUniformLocation(_defaultShader->id(),"texTerrain"),0);
+  glBindVertexArray(_vaoQuad);
+  glDrawArrays(GL_TRIANGLES,0,6);
+  */
+
+  // Déforme la grille
   
-  glUseProgram(_dispShader->id());
-  drawSceneFromCamera(_dispShader->id());
+  //glUseProgram(_dispShader->id());
+  //drawSceneFromCamera(_dispShader->id());
   
   //Lumieres 
   
-  //glUseProgram(_lightShader->id());
-  //drawSceneFromCamera(_lightShader->id());
+  glUseProgram(_lightShader->id());
+  drawSceneFromCamera(_lightShader->id());
   
   // disable shader 
   glUseProgram(0);
@@ -264,6 +300,7 @@ void Viewer::resizeGL(int width,int height) {
   glViewport(0,0,width,height);
   updateGL();
   noiseFBO();
+  normalFBO();
 }
 
 void Viewer::mousePressEvent(QMouseEvent *me) {
@@ -373,8 +410,8 @@ void Viewer::initializeGL() {
   // create/init FBO
   createFBO();
   noiseFBO();
+  normalFBO();
 
   // starts the timer 
   _timer->start();
 }
-

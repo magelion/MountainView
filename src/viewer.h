@@ -52,6 +52,7 @@ class Viewer : public QGLWidget {
   void createFBO();
   void deleteFBO();
   void noiseFBO();
+  void normalFBO();
 
   // drawing functions 
   void drawSceneFromCamera(GLuint id);
@@ -93,6 +94,7 @@ class Viewer : public QGLWidget {
 
   // texture ids 
   GLuint _texTerrain;
+  GLuint _texNormTerrain;
   GLuint _texColor[2];
   GLuint _texNormal[2];
   
