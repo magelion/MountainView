@@ -16,6 +16,7 @@ Viewer::Viewer(const QGLFormat &format)
     _mode(false),
     _showShadowMap(false),
     _depthResol(512),
+    _spotLight(false),
     _terrainResol(SIZE_TERRAIN) {
 
   setlocale(LC_ALL,"C");
@@ -203,13 +204,20 @@ void Viewer::deleteShaders() {
     //lumière
     glUniform3f(glGetUniformLocation(id,"light"), _light[0], _light[1], _light[2]);
     
+    //normalMode
+    
+    // TEMP : Change le mode d'éclairage
+    _spotLight = false;
+    
+    glUniform1i(glGetUniformLocation(id,"spot"), _spotLight);
+    
     // envoie la texture du terrain au shader  
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D,_texTerrain);
     glUniform1i(glGetUniformLocation(id,"hmap"),0);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D,_texNormTerrain);
-    glUniform1i(glGetUniformLocation(id,"nmap"),0);
+    glUniform1i(glGetUniformLocation(id,"nmap"),1);
     
 	glBindVertexArray(_vaoTerrain);
 	glDrawElements(GL_TRIANGLES,3*_grid->nbFaces(),GL_UNSIGNED_INT,(void *)0);
@@ -348,6 +356,11 @@ void Viewer::keyPressEvent(QKeyEvent *ke) {
       _timer->stop();
     else 
       _timer->start();
+  }
+  
+  // key l: change l'eclairage
+  if(ke->key()==Qt::Key_L) {
+    _mode=!_mode;
   }
 
   // key i: init camera
