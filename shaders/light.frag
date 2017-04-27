@@ -38,8 +38,10 @@ void main() {
         
         vec4 ambientColor = vec4(0.0,0.3,0.0,1.0);
         float brillance = 150.0;
-       
+       	
         vec3 color = vec3(0.0,0.5,0.0);
+        if(pos.z < 0.3)
+       		color = vec3(0.0,0.0,0.6);
         vec3 ambient = color*0.2;
         float diff = max(dot(norm, lightDir), 0.0);
         vec3 halfwayDir = normalize(lightDir + camView); 
