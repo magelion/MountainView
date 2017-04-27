@@ -384,7 +384,12 @@ void Viewer::keyPressEvent(QKeyEvent *ke) {
 
   // key r: reload shaders 
   if(ke->key()==Qt::Key_R) {
-    _renderingShader->reload("shaders/noise.vert","shaders/noise.vert");
+    _renderingShader->reload("shaders/noise.vert","shaders/noise.frag");
+    _defaultShader->reload("shaders/default.vert","shaders/default.frag");
+    _grilleShader->reload("shaders/grille.vert","shaders/grille.frag");
+    _normalShader->reload("shaders/normal.vert","shaders/normal.frag");
+    _dispShader->reload("shaders/displacement.vert","shaders/displacement.frag");
+    _lightShader->reload("shaders/light.vert","shaders/light.frag");
   }
 
   updateGL();
