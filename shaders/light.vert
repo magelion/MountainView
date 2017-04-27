@@ -43,7 +43,7 @@ void main() {
     coord = position.xy*0.5+0.5;
 
     //deplacement sur z
-    pos.z = texture(hmap,coord).x;
+    pos.z = (texture(hmap,coord).x)*1;
     gl_Position = projMat*mdvMat*vec4(pos,1.0);
 
     vec3 N = normalGrid();

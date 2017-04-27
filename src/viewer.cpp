@@ -48,6 +48,8 @@ void Viewer::deleteTextures() {
   // delete loaded textures 
   glDeleteTextures(1,&_texTerrain);
   glDeleteTextures(1,&_texNormTerrain);
+  glDeleteTextures(1,&_rockTexture);
+  glDeleteTextures(1,&_grassTexture);
   glDeleteTextures(2,_texColor);
   glDeleteTextures(2,_texNormal);
 }
@@ -108,7 +110,31 @@ void Viewer::normalFBO() {
 }*/
 
 void Viewer::createTextures() {
+    QImage imgRock, imgGrass;
+
+    glEnable(GL_TEXTURE_2D);
+    glGenTextures(1,&_rockTexture);
+    glGenTextures(1,&_grassTexture);
     
+    glBindTexture(GL_TEXTURE_2D,_rockTexture);
+    imgRock = QGLWidget::convertToGLFormat(QImage("textures/rock.jpg"));
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA32F,imgRock.width(),imgRock.height(),0,
+             GL_RGBA,GL_UNSIGNED_BYTE,(const GLvoid *)imgRock.bits());
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+    
+    glBindTexture(GL_TEXTURE_2D,_grassTexture);
+    imgGrass = QGLWidget::convertToGLFormat(QImage("textures/grass.jpg"));
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA32F,imgGrass.width(),imgGrass.height(),0,
+             GL_RGBA,GL_UNSIGNED_BYTE,(const GLvoid *)imgGrass.bits());
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
 
 }
 
@@ -218,6 +244,12 @@ void Viewer::deleteShaders() {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D,_texNormTerrain);
     glUniform1i(glGetUniformLocation(id,"nmap"),1);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D,_rockTexture);
+    glUniform1i(glGetUniformLocation(id,"rocktex"),2);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D,_grassTexture);
+    glUniform1i(glGetUniformLocation(id,"grasstex"),3);
     
 	glBindVertexArray(_vaoTerrain);
 	glDrawElements(GL_TRIANGLES,3*_grid->nbFaces(),GL_UNSIGNED_INT,(void *)0);
