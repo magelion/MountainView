@@ -71,7 +71,6 @@ class Viewer : public QGLWidget {
 
   glm::vec3 _light; // light direction
   bool      _mode;  // camera motion or light motion
-  bool      _spotLight; // utilise la normalmap ou un central difference scheme
   bool      _showShadowMap;
 
   Shader *_shadowMapShader;
@@ -108,6 +107,7 @@ class Viewer : public QGLWidget {
   GLuint _texDepth; // this will be our shadowmap! 
   unsigned int _depthResol; // this is the resolution of the shadowmap (squared texture)
   unsigned int _terrainResol;
+  unsigned int _spot;
   
   GLuint _terrain[2];
 

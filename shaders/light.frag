@@ -5,7 +5,7 @@ uniform sampler2D nmap;
 uniform sampler2D rocktex;
 uniform sampler2D grasstex;
 uniform vec3 light;
-uniform bool spot;
+uniform int spot;
 out vec4 bufferColor;
 
 in vec3 camView;
@@ -19,13 +19,18 @@ in vec3 lightDir;
 void main() {
     
     
-    if(spot) // Utilise la normale calculée dans le vertex shader
+    if(spot==1) // Utilise la normale calculée dans le vertex shader
     {
-        vec4 ambientC = vec4(0.0,0.3,0.0,1.0);
+        vec4 ambientC = (texture(rocktex,coord))*0.3;
         float brillance = 64.0;
 
-        if(pos.z<0.20) { brillance = 10; ambientC = vec4(0.0,0.3,0.5,1.0); }
-
+        if(pos.z<0.20) { brillance = 10; ambientC = ambientC + vec4(0.0,0.3,0.5,1.0); }
+        if(pos.z < 0.20)
+        {
+            float neige = 1.0 - (pos.z*5.0);
+            ambientC = ambientC + vec4(1.0)*neige;
+            brillance = 10;
+        }
         vec3 refletDir = normalize(reflect(-lightDir, normal));
         vec4 frag = ambientC + vec4(0.5,0.5,0.5,1.0)*max(0.0, dot(lightDir, normal));  
         frag = frag+vec4(1.0,1.0,0.0,1.0)*pow(max(0.0, dot(refletDir, camView)), brillance);

@@ -8,7 +8,6 @@ uniform mat4 mdvMat;
 uniform mat4 projMat;
 uniform mat3 normalMat;
 uniform vec3 light;
-uniform bool spot;
 
 out vec3 camView;
 out vec3 normal;
