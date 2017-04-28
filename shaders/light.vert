@@ -10,6 +10,7 @@ uniform mat3 normalMat;
 uniform vec3 light;
 
 out vec3 camView;
+out vec4 viewSpace;
 out vec3 normal;
 out vec3 lightDir;
 out vec3 pos;
@@ -43,7 +44,8 @@ void main() {
 
     //deplacement sur z
     pos.z = (texture(hmap,coord).x)*1;
-    gl_Position = projMat*mdvMat*vec4(pos,1.0);
+    viewSpace = mdvMat*vec4(pos,1.0);
+    gl_Position = projMat*viewSpace;
 
     vec3 N = normalGrid();
     normal = normalMat * N;

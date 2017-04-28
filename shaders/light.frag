@@ -14,10 +14,17 @@ in vec3 normal;
 in vec3 pos;
 in vec2 coord;
 in vec3 lightDir;
+in vec4 viewSpace;
 
 
 void main() {
     
+    // brouillard
+    float density = 0.5;
+    vec4 FogC = vec4(0.25,0.25,0.25,1.0);
+    float dist = length(viewSpace);
+    float fogFactor = 1.0 /exp(dist * density);
+    fogFactor = clamp( fogFactor, 0.0, 1.0 );
     
     if(spot==1) // Utilise la normale calculée dans le vertex shader
     {
@@ -36,7 +43,8 @@ void main() {
         frag = frag+vec4(1.0,1.0,0.0,1.0)*pow(max(0.0, dot(refletDir, camView)), brillance);
         frag.a = 1.0;
 
-        bufferColor = frag + fragmentColor*0.4;
+        vec4 finalColor = frag + fragmentColor*0.4;
+        bufferColor = mix(FogC,finalColor,fogFactor);
     }
     else // Utilise la normale lue dans la texture
     {
@@ -69,8 +77,8 @@ void main() {
         //float spec = pow(max(0.0, dot(reflectDir, camView)), brillance);
         vec3 specular = vec3(0.75,0.75,0.75) * spec;
         
-        
-        bufferColor = vec4(ambient + diffuse + specular, 1.0f);
+        vec4 finalColor = vec4(ambient + diffuse + specular, 1.0f);
+        bufferColor = mix(FogC,finalColor,fogFactor);
     }
     
 }
